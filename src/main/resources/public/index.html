@@ -1,0 +1,38 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>RXJava</title>
+    <meta name="description" content="Simple RXJava example">
+    <meta name="author" content="Simplex Software">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+    <style>
+        #mapid { height: 640px; }
+    </style>
+</head>
+
+<body>
+<div id="mapid"></div>
+<script>
+    var mymap = L.map('mapid').setView([34.029331, -118.201904], 10);
+    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(mymap);
+
+    var socket = new WebSocket("ws://localhost:4567/crimes");
+    socket.onmessage = function (event) {
+      console.log(event.data);
+      var crime = JSON.parse(event.data);
+      var marker = L.marker([crime.coordinates.lat, crime.coordinates.lng]).addTo(mymap);
+      marker.bindPopup("<b>" + crime.crimeDescription + "</b><br>" + crime.areaName + " " + crime.address).openPopup()
+      window.setTimeout(function(){
+        mymap.removeLayer(marker);
+      }, 3000);
+    }
+</script>
+</body>
+</html>
